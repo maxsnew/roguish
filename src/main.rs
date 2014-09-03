@@ -4,7 +4,7 @@ use tcod::{Console, background_flag, key_code, Special};
 use std::cmp;
 use std::rand::Rng;
 
-struct State {
+struct Game {
     player: Character,
     friend: Character
 }
@@ -26,22 +26,10 @@ static DOG_START: int = 10i;
 fn main() {
     let mut con   = Console::init_root(WINDOW_WIDTH, WINDOW_HEIGHT, "libtcod Rust tutorial", false);
     let mut exit  = false;
-    let mut state =
-        State { player: Character {
-                          position: 
-                            Position { x: WINDOW_WIDTH  / 2
-                                     , y: WINDOW_HEIGHT / 2 
-                            }
-                        , display: '@'
-                }
-              , friend: Character { 
-                          position:
-                            Position { x: DOG_START
-                                     , y: DOG_START 
-                            }
-                        , display: 'd'
-              }
-        };
+    let mut state = Game::new( Character::new( Position::new(WINDOW_WIDTH  / 2, WINDOW_HEIGHT / 2)
+                                             , '@')
+                             , Character::new( Position::new(DOG_START, DOG_START)
+                                             , 'd'));
     // Initial render
     render(&mut con, state);
     while !(Console::window_closed() || exit) {
@@ -71,10 +59,10 @@ fn update_position(pos: &mut Position, moveX: int, moveY: int) {
     pos.y = std::cmp::max(0, cmp::min(WINDOW_HEIGHT - 1, pos.y + moveY));
 }
 
-fn render(con: &mut Console, state: State) {
+fn render(con: &mut Console, state: Game) {
     con.clear();
     match state {
-        State { player: playerC
+        Game { player: playerC
               , friend: friendC } => {
             friendC.render(con);
             playerC.render(con);
@@ -83,12 +71,28 @@ fn render(con: &mut Console, state: State) {
     con.flush();
 }
 
-impl Character { 
+impl Game {
+    fn new(p: Character, f: Character) -> Game {
+        Game { player: p, friend: f}
+    }
+}
+
+impl Character {
+    fn new(pos: Position, c: char) -> Character {
+        Character { position: pos, display: c}
+    }
+
     fn render(&self, con: &mut Console) {
         con.put_char(self.position.x, self.position.y, self.display, background_flag::Set);
     }
 
     fn update(&mut self, moveX: int, moveY: int) {
         update_position(&mut self.position, moveX, moveY)
+    }
+}
+
+impl Position {
+    fn new(x: int, y: int) -> Position {
+        Position { x: x, y: y }
     }
 }
