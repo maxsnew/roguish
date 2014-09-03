@@ -3,6 +3,11 @@ use tcod::{Console, background_flag, key_code, Special};
 use std::cmp;
 
 struct State {
+    player: Position,
+    friend: Position
+}
+
+struct Position {
     x: int,
     y: int
 }
@@ -13,8 +18,11 @@ static WINDOW_HEIGHT: int = 50;
 fn main() {
     let mut con   = Console::init_root(WINDOW_WIDTH, WINDOW_HEIGHT, "libtcod Rust tutorial", false);
     let mut exit  = false;
-    let mut state = State { x: WINDOW_WIDTH  / 2,
-                            y: WINDOW_HEIGHT / 2 };
+    let mut state = 
+        State { player: Position { x: WINDOW_WIDTH  / 2,
+                                   y: WINDOW_HEIGHT / 2 } 
+              , friend: Position { x: WINDOW_WIDTH  / 2 + 1,
+                                   y: WINDOW_HEIGHT / 2 + 1}};
     // Initial render
     render(&mut con, state);
     while !(Console::window_closed() || exit) {
@@ -24,10 +32,10 @@ fn main() {
         // update game state
         match keypress.key {
             Special(key_code::Escape) => exit = true,
-            Special(key_code::Up)     => state.y = cmp::max(0, state.y - 1),
-            Special(key_code::Down)   => state.y = cmp::min(WINDOW_HEIGHT - 1, state.y + 1),
-            Special(key_code::Left)   => state.x = cmp::max(0, state.x - 1),
-            Special(key_code::Right)  => state.x = cmp::min(WINDOW_WIDTH - 1, state.x + 1),
+            Special(key_code::Up)     => state.player.y = cmp::max(0, state.player.y - 1),
+            Special(key_code::Down)   => state.player.y = cmp::min(WINDOW_HEIGHT - 1, state.player.y + 1),
+            Special(key_code::Left)   => state.player.x = cmp::max(0, state.player.x - 1),
+            Special(key_code::Right)  => state.player.x = cmp::min(WINDOW_WIDTH - 1, state.player.x + 1),
             _                         => {}
         }
 
@@ -39,8 +47,13 @@ fn main() {
 fn render(con: &mut Console, state: State) {
     con.clear();
     match state {
-        State {x: xx, y: yy} => 
-            con.put_char(xx, yy, '@', background_flag::Set)
+        State { player: Position {x: px, y: py}
+              , friend: Position {x: fx, y: fy}} => {
+            con.put_char(px, py, '@', background_flag::Set);
+            if !(px == fx && py == fy) {
+                con.put_char(fx, fy, 'd', background_flag::Set)
+            }
+        }
     };
     con.flush();
 }
