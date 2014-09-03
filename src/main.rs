@@ -1,20 +1,15 @@
 extern crate tcod;
 extern crate roguish;
 
-use tcod::{Console, background_flag, key_code, Special};
-use std::cmp;
+use tcod::{Console, key_code, Special};
 use std::rand::Rng;
 use roguish::util::{Bound, Position};
+use roguish::character::Character;
 
 struct Game {
     player: Character,
     friend: Character,
     bound:  Bound
-}
-
-struct Character {
-    position: Position,
-    display:  char
 }
 
 static WINDOW_WIDTH:  int = 80i;
@@ -54,11 +49,6 @@ fn main() {
     }
 }
 
-fn update_position(pos: &mut Position, moveX: int, moveY: int, bound: Bound) {
-    pos.x = std::cmp::max(bound.min.x, cmp::min(bound.max.x - 1, pos.x + moveX));
-    pos.y = std::cmp::max(bound.min.y, cmp::min(bound.max.y - 1, pos.y + moveY));
-}
-
 fn render(con: &mut Console, game: Game) {
     con.clear();
     match game {
@@ -75,19 +65,5 @@ fn render(con: &mut Console, game: Game) {
 impl Game {
     fn new(p: Character, f: Character, b: Bound) -> Game {
         Game { player: p, friend: f, bound: b}
-    }
-}
-
-impl Character {
-    fn new(pos: Position, c: char) -> Character {
-        Character { position: pos, display: c}
-    }
-
-    fn render(&self, con: &mut Console) {
-        con.put_char(self.position.x, self.position.y, self.display, background_flag::Set);
-    }
-
-    fn update(&mut self, bound: Bound, moveX: int, moveY: int) {
-        update_position(&mut self.position, moveX, moveY, bound)
     }
 }
