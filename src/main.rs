@@ -1,16 +1,12 @@
 extern crate tcod;
 extern crate roguish;
 
-use tcod::{Console, key_code, Special};
 use std::rand::Rng;
-use roguish::util::{Bound, Position};
-use roguish::character::Character;
+use tcod::{Console, key_code, Special};
 
-struct Game {
-    player: Character,
-    friend: Character,
-    bound:  Bound
-}
+use roguish::character::Character;
+use roguish::game::Game;
+use roguish::util::{Bound, Position};
 
 static WINDOW_WIDTH:  int = 80i;
 static WINDOW_HEIGHT: int = 50i;
@@ -60,10 +56,4 @@ fn render(con: &mut Console, game: Game) {
         }
     };
     con.flush();
-}
-
-impl Game {
-    fn new(p: Character, f: Character, b: Bound) -> Game {
-        Game { player: p, friend: f, bound: b}
-    }
 }
