@@ -5,8 +5,13 @@ use std::cmp;
 use std::rand::Rng;
 
 struct State {
-    player: Position,
-    friend: Position,
+    player: Character,
+    friend: Character
+}
+
+struct Character {
+    position: Position,
+    display:  char
 }
 
 struct Position {
@@ -22,10 +27,20 @@ fn main() {
     let mut con   = Console::init_root(WINDOW_WIDTH, WINDOW_HEIGHT, "libtcod Rust tutorial", false);
     let mut exit  = false;
     let mut state =
-        State { player: Position { x: WINDOW_WIDTH  / 2
-                                 , y: WINDOW_HEIGHT / 2 }
-              , friend: Position { x: DOG_START
-                                 , y: DOG_START } 
+        State { player: Character {
+                          position: 
+                            Position { x: WINDOW_WIDTH  / 2
+                                     , y: WINDOW_HEIGHT / 2 
+                            }
+                        , display: '@'
+                }
+              , friend: Character { 
+                          position:
+                            Position { x: DOG_START
+                                     , y: DOG_START 
+                            }
+                        , display: 'd'
+              }
         };
     // Initial render
     render(&mut con, state);
@@ -36,13 +51,13 @@ fn main() {
         // update game state
         let moveFX = std::rand::task_rng().gen_range(-1i, 2i);
         let moveFY = std::rand::task_rng().gen_range(-1i, 2i);
-        update_position(&mut state.friend, moveFX, moveFY);
+        state.friend.update(moveFX, moveFY);
         match keypress.key {
             Special(key_code::Escape) => exit = true,
-            Special(key_code::Up)     => update_position(&mut state.player, 0, -1),
-            Special(key_code::Down)   => update_position(&mut state.player, 0, 1),
-            Special(key_code::Left)   => update_position(&mut state.player, -1, 0),
-            Special(key_code::Right)  => update_position(&mut state.player, 1, 0),
+            Special(key_code::Up)     => state.player.update(0, -1),
+            Special(key_code::Down)   => state.player.update(0, 1),
+            Special(key_code::Left)   => state.player.update(-1, 0),
+            Special(key_code::Right)  => state.player.update(1, 0),
             _                         => {}
         }
 
@@ -59,13 +74,21 @@ fn update_position(pos: &mut Position, moveX: int, moveY: int) {
 fn render(con: &mut Console, state: State) {
     con.clear();
     match state {
-        State { player: Position {x: px, y: py}
-              , friend: Position {x: fx, y: fy} } => {
-            con.put_char(px, py, '@', background_flag::Set);
-            if !(px == fx && py == fy) {
-                con.put_char(fx, fy, 'd', background_flag::Set)
-            }
+        State { player: playerC
+              , friend: friendC } => {
+            friendC.render(con);
+            playerC.render(con);
         }
     };
     con.flush();
+}
+
+impl Character { 
+    fn render(&self, con: &mut Console) {
+        con.put_char(self.position.x, self.position.y, self.display, background_flag::Set);
+    }
+
+    fn update(&mut self, moveX: int, moveY: int) {
+        update_position(&mut self.position, moveX, moveY)
+    }
 }
