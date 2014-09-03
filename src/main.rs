@@ -12,17 +12,18 @@ struct Position {
     y: int
 }
 
-static WINDOW_WIDTH:  int = 80;
-static WINDOW_HEIGHT: int = 50;
+static WINDOW_WIDTH:  int = 80i;
+static WINDOW_HEIGHT: int = 50i;
+static DOG_START: int = 10i;
 
 fn main() {
     let mut con   = Console::init_root(WINDOW_WIDTH, WINDOW_HEIGHT, "libtcod Rust tutorial", false);
     let mut exit  = false;
     let mut state = 
-        State { player: Position { x: WINDOW_WIDTH  / 2,
-                                   y: WINDOW_HEIGHT / 2 } 
-              , friend: Position { x: WINDOW_WIDTH  / 2 + 1,
-                                   y: WINDOW_HEIGHT / 2 + 1}};
+        State { player: Position { x: WINDOW_WIDTH  / 2
+                                 , y: WINDOW_HEIGHT / 2 }
+              , friend: Position { x: DOG_START
+                                 , y: DOG_START } };
     // Initial render
     render(&mut con, state);
     while !(Console::window_closed() || exit) {
@@ -32,16 +33,21 @@ fn main() {
         // update game state
         match keypress.key {
             Special(key_code::Escape) => exit = true,
-            Special(key_code::Up)     => state.player.y = cmp::max(0, state.player.y - 1),
-            Special(key_code::Down)   => state.player.y = cmp::min(WINDOW_HEIGHT - 1, state.player.y + 1),
-            Special(key_code::Left)   => state.player.x = cmp::max(0, state.player.x - 1),
-            Special(key_code::Right)  => state.player.x = cmp::min(WINDOW_WIDTH - 1, state.player.x + 1),
+            Special(key_code::Up)     => update_position(&mut state.player, 0, -1),
+            Special(key_code::Down)   => update_position(&mut state.player, 0, 1),
+            Special(key_code::Left)   => update_position(&mut state.player, -1, 0),
+            Special(key_code::Right)  => update_position(&mut state.player, 1, 0),
             _                         => {}
         }
 
         // render
         render(&mut con, state);
     }
+}
+
+fn update_position(pos: &mut Position, moveX: int, moveY: int) {
+    pos.x = cmp::max(0, cmp::min(WINDOW_WIDTH  - 1, pos.x + moveX));
+    pos.y = cmp::max(0, cmp::min(WINDOW_HEIGHT - 1, pos.y + moveY));
 }
 
 fn render(con: &mut Console, state: State) {
